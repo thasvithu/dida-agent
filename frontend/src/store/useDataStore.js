@@ -227,6 +227,63 @@ export const useDataStore = create((set, get) => ({
 
     clearChatHistory: () => set({ chatHistory: [] }),
 
+    cleanDataset: async () => {
+        set({ isCleaning: true, cleaningError: null });
+        try {
+            const sessionId = get().sessionId || sessionStorage.getItem('dida_session_id');
+            const response = await fetch('/api/clean/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': sessionId, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+            if (!response.ok) throw new Error('Cleaning failed');
+            const data = await response.json();
+            set({ cleaningResult: data, isCleaning: false, preview: data.cleaned_preview });
+            return { success: true, data };
+        } catch (error) {
+            set({ isCleaning: false, cleaningError: error.message });
+            return { success: false, error: error.message };
+        }
+    },
+
+    engineerFeatures: async (instructions = "") => {
+        set({ isEngineeringFeatures: true, featureEngineeringError: null });
+        try {
+            const sessionId = get().sessionId || sessionStorage.getItem('dida_session_id');
+            const response = await fetch('/api/feature-engineering/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': sessionId, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId, instructions })
+            });
+            if (!response.ok) throw new Error('Feature engineering failed');
+            const data = await response.json();
+            set({ featureEngineering: data, isEngineeringFeatures: false, preview: data.preview });
+            return { success: true, data };
+        } catch (error) {
+            set({ isEngineeringFeatures: false, featureEngineeringError: error.message });
+            return { success: false, error: error.message };
+        }
+    },
+
+    generateReport: async () => {
+        set({ isGeneratingReport: true, reportError: null });
+        try {
+            const sessionId = get().sessionId || sessionStorage.getItem('dida_session_id');
+            const response = await fetch('/api/report/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': sessionId, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+            if (!response.ok) throw new Error('Report generation failed');
+            const data = await response.json();
+            set({ report: data, isGeneratingReport: false });
+            return { success: true, data };
+        } catch (error) {
+            set({ isGeneratingReport: false, reportError: error.message });
+            return { success: false, error: error.message };
+        }
+    },
+
     reset: () => set({
         uploadedFile: null,
         sessionId: null,

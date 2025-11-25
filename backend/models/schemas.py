@@ -110,7 +110,9 @@ class CleaningRequest(BaseModel):
 class CleaningResponse(BaseModel):
     """Response from cleaning"""
     session_id: str
-    decisions: List[CleaningDecision]
+    decisions: Optional[List[CleaningDecision]] = None
+    cleaning_steps: List[str] = []
+    applied_changes: str = ""
     rows_before: int
     rows_after: int
     columns_before: int
@@ -135,16 +137,20 @@ class FeatureEngineeringRequest(BaseModel):
     session_id: str
     target_column: Optional[str] = None
     auto_engineer: bool = True
+    instructions: Optional[str] = None
     custom_features: Optional[List[Dict[str, Any]]] = []
 
 
 class FeatureEngineeringResponse(BaseModel):
     """Response from feature engineering"""
     session_id: str
-    new_features: List[FeatureInfo]
-    feature_importance: Dict[str, float]
-    correlation_matrix: Optional[Dict[str, Any]] = None
+    status: str
+    new_features: List[str]
+    code_generated: str
+    preview: List[Dict[str, Any]]
     summary: str
+    feature_importance: Optional[Dict[str, float]] = None
+    correlation_matrix: Optional[Dict[str, Any]] = None
 
 
 # ==================== Report Schemas ====================
@@ -159,10 +165,11 @@ class ReportRequest(BaseModel):
 class ReportResponse(BaseModel):
     """Response from report generation"""
     session_id: str
-    pdf_url: Optional[str] = None
-    html_url: Optional[str] = None
+    status: str
+    report_url: Optional[str] = None
     summary: str
-    generated_at: datetime
+    insights: List[str] = []
+    generated_at: datetime = Field(default_factory=datetime.now)
 
 
 # ==================== Chat Schemas ====================

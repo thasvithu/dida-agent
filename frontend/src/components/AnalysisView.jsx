@@ -3,7 +3,12 @@ import { Sparkles, AlertTriangle, CheckCircle2, HelpCircle, TrendingUp, Loader2 
 import { useDataStore } from '../store/useDataStore';
 
 function AnalysisView() {
-    const { analysis, isAnalyzing, analysisError, analyzeDataset } = useDataStore();
+    const {
+        analysis, isAnalyzing, analysisError, analyzeDataset,
+        cleanDataset, isCleaning, cleaningResult,
+        engineerFeatures, isEngineeringFeatures, featureEngineering,
+        generateReport, isGeneratingReport, report
+    } = useDataStore();
 
     useEffect(() => {
         // Auto-trigger analysis if not already done
@@ -181,16 +186,18 @@ function AnalysisView() {
                         >
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1">
-                                    <div className="flex items-center space-x-2 mb-1">
-                                        <h4 className="font-mono font-semibold text-slate-800">{col.name}</h4>
-                                        <span className={`badge ${getDataTypeBadge(col.data_type)}`}>
-                                            {col.data_type}
-                                        </span>
-                                        {col.is_primary_key && (
-                                            <span className="badge bg-amber-100 text-amber-800">Primary Key</span>
-                                        )}
+                                    <div className="flex-1">
+                                        <div className="flex items-center space-x-2 mb-1">
+                                            <h4 className="font-mono font-semibold text-slate-800">{col.name}</h4>
+                                            <span className={`badge ${getDataTypeBadge(col.data_type)}`}>
+                                                {col.data_type}
+                                            </span>
+                                            {col.is_primary_key && (
+                                                <span className="badge bg-amber-100 text-amber-800">Primary Key</span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-slate-600">{col.inferred_meaning}</p>
                                     </div>
-                                    <p className="text-sm text-slate-600">{col.inferred_meaning}</p>
                                 </div>
                             </div>
 
@@ -198,8 +205,8 @@ function AnalysisView() {
                                 <div>
                                     <span className="text-slate-500">Null Values:</span>
                                     <span className={`ml-2 font-semibold ${col.null_percentage > 50 ? 'text-red-600' :
-                                            col.null_percentage > 20 ? 'text-yellow-600' :
-                                                'text-green-600'
+                                        col.null_percentage > 20 ? 'text-yellow-600' :
+                                            'text-green-600'
                                         }`}>
                                         {col.null_count} ({col.null_percentage.toFixed(1)}%)
                                     </span>
@@ -242,17 +249,74 @@ function AnalysisView() {
             <div className="card bg-gradient-to-r from-primary-50 to-secondary-50 border-primary-200">
                 <h3 className="font-semibold text-slate-800 mb-3">Next Steps</h3>
                 <div className="flex space-x-3">
-                    <button className="btn-primary flex-1" disabled>
-                        <Sparkles className="w-4 h-4 inline mr-2" />
-                        Clean Dataset (Coming Soon)
+                    <button
+                        className="btn-primary flex-1"
+                        onClick={() => cleanDataset()}
+                        disabled={isCleaning}
+                    >
+                        {isCleaning ? <Loader2 className="w-4 h-4 inline mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 inline mr-2" />}
+                        {isCleaning ? 'Cleaning...' : 'Clean Dataset'}
                     </button>
-                    <button className="btn-secondary flex-1" disabled>
-                        Feature Engineering (Coming Soon)
+                    <button
+                        className="btn-secondary flex-1"
+                        onClick={() => engineerFeatures()}
+                        disabled={isEngineeringFeatures}
+                    >
+                        {isEngineeringFeatures ? <Loader2 className="w-4 h-4 inline mr-2 animate-spin" /> : <TrendingUp className="w-4 h-4 inline mr-2" />}
+                        {isEngineeringFeatures ? 'Engineering...' : 'Feature Engineering'}
                     </button>
-                    <button className="btn-secondary flex-1" disabled>
-                        Generate Report (Coming Soon)
+                    <button
+                        className="btn-secondary flex-1"
+                        onClick={() => generateReport()}
+                        disabled={isGeneratingReport}
+                    >
+                        {isGeneratingReport ? <Loader2 className="w-4 h-4 inline mr-2 animate-spin" /> : <TrendingUp className="w-4 h-4 inline mr-2" />}
+                        {isGeneratingReport ? 'Generating...' : 'Generate Report'}
                     </button>
                 </div>
+
+                {/* Results Feedback */}
+                {cleaningResult && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center text-green-800 font-medium mb-1">
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Dataset Cleaned Successfully
+                        </div>
+                        <p className="text-sm text-green-700">{cleaningResult.summary}</p>
+                    </div>
+                )}
+
+                {featureEngineering && (
+                    <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                        <div className="flex items-center text-purple-800 font-medium mb-1">
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Features Engineered Successfully
+                        </div>
+                        <p className="text-sm text-purple-700">{featureEngineering.summary}</p>
+                    </div>
+                )}
+
+                {report && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div className="flex items-center text-blue-800 font-medium mb-1">
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                    Report Generated Successfully
+                                </div>
+                                <p className="text-sm text-blue-700">Your comprehensive analysis report is ready.</p>
+                            </div>
+                            <a
+                                href={report.report_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-primary text-sm py-1.5 px-3"
+                            >
+                                Download PDF
+                            </a>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
