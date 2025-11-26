@@ -172,6 +172,36 @@ class ReportResponse(BaseModel):
     generated_at: datetime = Field(default_factory=datetime.now)
 
 
+# ==================== ML Preparation Schemas ====================
+
+class MLPrepRequest(BaseModel):
+    """Request for ML preparation"""
+    session_id: str
+    target_column: str
+    test_size: float = 0.2
+    random_state: int = 42
+    scaling_strategy: Literal["standard", "minmax", "robust"] = "standard"
+    encoding_strategy: Literal["auto", "onehot", "label"] = "auto"
+
+
+class MLPrepResponse(BaseModel):
+    """Response from ML preparation"""
+    session_id: str
+    status: str
+    problem_type: str  # classification or regression
+    train_samples: int
+    test_samples: int
+    num_features: int
+    encoded_columns: List[str]
+    scaled_columns: List[str]
+    target_encoded: bool
+    class_distribution: Optional[Dict[str, int]] = None
+    recommended_algorithms: List[str]
+    warnings: List[str]
+    best_practices: List[str]
+    download_urls: Dict[str, str]
+
+
 # ==================== Chat Schemas ====================
 
 class ChatMessage(BaseModel):

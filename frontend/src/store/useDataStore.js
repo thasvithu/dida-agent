@@ -37,6 +37,11 @@ export const useDataStore = create((set, get) => ({
     isGeneratingReport: false,
     reportError: null,
 
+    // ML Preparation state
+    mlPrep: null,
+    isPreparingML: false,
+    mlPrepError: null,
+
     // Chat state
     chatHistory: [],
     isChatting: false,
@@ -280,6 +285,32 @@ export const useDataStore = create((set, get) => ({
             return { success: true, data };
         } catch (error) {
             set({ isGeneratingReport: false, reportError: error.message });
+            return { success: false, error: error.message };
+        }
+    },
+
+    prepareForML: async (targetColumn, options = {}) => {
+        set({ isPreparingML: true, mlPrepError: null });
+        try {
+            const sessionId = get().sessionId || sessionStorage.getItem('dida_session_id');
+            const response = await fetch('/api/ml-prep/', {
+                method: 'POST',
+                headers: { 'X-Session-ID': sessionId, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    target_column: targetColumn,
+                    test_size: options.testSize || 0.2,
+                    random_state: options.randomState || 42,
+                    scaling_strategy: options.scalingStrategy || 'standard',
+                    encoding_strategy: options.encodingStrategy || 'auto'
+                })
+            });
+            if (!response.ok) throw new Error('ML preparation failed');
+            const data = await response.json();
+            set({ mlPrep: data, isPreparingML: false });
+            return { success: true, data };
+        } catch (error) {
+            set({ isPreparingML: false, mlPrepError: error.message });
             return { success: false, error: error.message };
         }
     },

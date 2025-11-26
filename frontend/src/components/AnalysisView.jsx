@@ -1,14 +1,18 @@
-import React, { useEffect } from 'react';
-import { Sparkles, AlertTriangle, CheckCircle2, HelpCircle, TrendingUp, Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Sparkles, AlertTriangle, CheckCircle2, HelpCircle, TrendingUp, Loader2, Brain } from 'lucide-react';
 import { useDataStore } from '../store/useDataStore';
+import { MLPrepModal, MLPrepResults } from './MLPrepComponents';
 
 function AnalysisView() {
     const {
         analysis, isAnalyzing, analysisError, analyzeDataset,
         cleanDataset, isCleaning, cleaningResult,
         engineerFeatures, isEngineeringFeatures, featureEngineering,
-        generateReport, isGeneratingReport, report
+        generateReport, isGeneratingReport, report,
+        mlPrep, columnNames
     } = useDataStore();
+
+    const [showMLPrepModal, setShowMLPrepModal] = useState(false);
 
     useEffect(() => {
         // Auto-trigger analysis if not already done
@@ -16,6 +20,19 @@ function AnalysisView() {
             analyzeDataset();
         }
     }, []);
+
+    // Scroll to ML prep results when they appear
+    useEffect(() => {
+        if (mlPrep) {
+            // Small delay to ensure DOM is updated
+            setTimeout(() => {
+                const resultsElement = document.getElementById('ml-prep-results');
+                if (resultsElement) {
+                    resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+    }, [mlPrep]);
 
     const handleAnalyze = () => {
         analyzeDataset();
@@ -318,6 +335,44 @@ function AnalysisView() {
                     </div>
                 )}
             </div>
+
+            {/* ML Preparation Section */}
+            <div className="card bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <h3 className="font-semibold text-slate-800 mb-3 flex items-center">
+                    <Brain className="w-5 h-5 mr-2 text-purple-600" />
+                    Machine Learning Preparation
+                </h3>
+                <p className="text-sm text-slate-600 mb-4">
+                    Prepare your dataset for machine learning with automated encoding, scaling, and train/test splitting.
+                </p>
+                <button
+                    onClick={() => setShowMLPrepModal(true)}
+                    className="btn-primary w-full"
+                >
+                    <Brain className="w-4 h-4 mr-2" />
+                    Prepare for ML
+                </button>
+            </div>
+
+            {/* ML Prep Modal */}
+            <MLPrepModal
+                isOpen={showMLPrepModal}
+                onClose={() => setShowMLPrepModal(false)}
+                columns={columnNames}
+                suggestedTarget={analysis?.suggested_target}
+            />
+
+            {/* ML Prep Results */}
+            {mlPrep && (
+                <MLPrepResults
+                    mlPrep={mlPrep}
+                    onClose={() => {
+                        // Clear ML prep results when user closes
+                        const { reset } = useDataStore.getState();
+                        useDataStore.setState({ mlPrep: null });
+                    }}
+                />
+            )}
         </div>
     );
 }

@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import routers
-from routers import upload, analyze, clean, feature_engineering, report, chat, export, auth
+from routers import upload, analyze, clean, feature_engineering, report, chat, export, auth, ml_prep
 
 # Create necessary directories
 os.makedirs(os.getenv("UPLOAD_DIR", "./uploads"), exist_ok=True)
@@ -62,6 +62,7 @@ app.include_router(feature_engineering.router, prefix="/api/feature-engineering"
 app.include_router(report.router, prefix="/api/report", tags=["Reporting"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(export.router, prefix="/api/export", tags=["Export"])
+app.include_router(ml_prep.router)
 
 # Mount static files for reports
 app.mount("/reports", StaticFiles(directory="./reports"), name="reports")
