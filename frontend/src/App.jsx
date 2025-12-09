@@ -5,6 +5,7 @@ import DataPreview from './components/DataPreview';
 import AnalysisView from './components/AnalysisView';
 import SettingsPanel from './components/SettingsPanel';
 import ChatInterface from './components/ChatInterface';
+import ExportView from './components/ExportView';
 import { useDataStore } from './store/useDataStore';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -23,6 +24,7 @@ function App() {
         { id: 'upload', label: 'Upload Data', icon: Database },
         { id: 'analyze', label: 'Analysis', icon: Sparkles, disabled: !uploadedFile },
         { id: 'chat', label: 'Chat', icon: MessageSquare, disabled: !uploadedFile },
+        { id: 'export', label: 'Export', icon: Download, disabled: !uploadedFile },
     ];
 
     const needsApiKey = !hasSessionKey && !hasSystemKey;
@@ -140,6 +142,10 @@ function App() {
 
                     {activeTab === 'chat' && (
                         <ChatInterface />
+                    )}
+
+                    {activeTab === 'export' && (
+                        <ExportView />
                     )}
                 </div>
             </main>

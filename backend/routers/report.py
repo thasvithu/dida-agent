@@ -19,7 +19,7 @@ async def generate_report(
     session_id: Optional[str] = Header(None, alias="X-Session-ID")
 ):
     """
-    Generate a comprehensive PDF report.
+    Generate a comprehensive PDF and/or HTML report.
     """
     if not session_id:
         session_id = request.session_id
@@ -49,18 +49,25 @@ async def generate_report(
         # Generate Content
         content = agent.generate_report_content(df)
         
-        # Generate PDF
+        # Generate reports based on requested format
         generator = ReportGenerator(file_handler.upload_dir)
-        pdf_path = generator.create_pdf(content, df, session_id)
+        report_url = None
         
-        # Return response with download URL (relative path)
-        # In a real app, we'd return a URL to a static file server or a download endpoint
-        # For now, we'll return the relative path which the frontend can use to request the file
+        if request.format in ["pdf", "both"]:
+            pdf_path = generator.create_pdf(content, df, session_id)
+            report_url = f"/api/export/download/{session_id}/report.pdf"
+            
+        if request.format in ["html", "both"]:
+            html_path = generator.create_html(content, df, session_id)
+            if not report_url:
+                report_url = f"/api/export/download/{session_id}/report.html"
+        
+        logger.info(f"Report generation completed for session: {session_id}")
         
         return ReportResponse(
             session_id=session_id,
             status="success",
-            report_url=f"/api/export/download/{session_id}/report.pdf",
+            report_url=report_url,
             summary=content.get("summary", ""),
             insights=content.get("insights", [])
         )

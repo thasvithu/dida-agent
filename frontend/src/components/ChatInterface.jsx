@@ -110,10 +110,13 @@ function ChatInterface() {
                                         {msg.visualization && (
                                             <div className="mt-3 p-3 bg-slate-50 rounded-lg">
                                                 <p className="text-xs text-slate-500 mb-2">📊 Visualization</p>
-                                                {/* Placeholder for visualization - would integrate Plotly here */}
-                                                <div className="h-48 bg-slate-100 rounded flex items-center justify-center text-slate-400 text-sm">
-                                                    Chart would render here
-                                                </div>
+                                                {msg.visualization.type === 'image' && msg.visualization.data && (
+                                                    <img 
+                                                        src={`data:image/png;base64,${msg.visualization.data}`}
+                                                        alt="Generated visualization"
+                                                        className="w-full rounded border border-slate-200"
+                                                    />
+                                                )}
                                             </div>
                                         )}
 

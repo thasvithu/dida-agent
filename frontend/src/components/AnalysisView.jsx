@@ -323,14 +323,24 @@ function AnalysisView() {
                                 </div>
                                 <p className="text-sm text-blue-700">Your comprehensive analysis report is ready.</p>
                             </div>
-                            <a
-                                href={report.report_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn-primary text-sm py-1.5 px-3"
-                            >
-                                Download PDF
-                            </a>
+                            <div className="flex space-x-2">
+                                <a
+                                    href={`/api/export/download/${report.session_id}/report.pdf`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-primary text-sm py-1.5 px-3"
+                                >
+                                    Download PDF
+                                </a>
+                                <a
+                                    href={`/api/export/download/${report.session_id}/report.html`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-secondary text-sm py-1.5 px-3"
+                                >
+                                    View HTML
+                                </a>
+                            </div>
                         </div>
                     </div>
                 )}

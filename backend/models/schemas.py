@@ -110,6 +110,7 @@ class CleaningRequest(BaseModel):
 class CleaningResponse(BaseModel):
     """Response from cleaning"""
     session_id: str
+    status: str = "success"
     decisions: Optional[List[CleaningDecision]] = None
     cleaning_steps: List[str] = []
     applied_changes: str = ""

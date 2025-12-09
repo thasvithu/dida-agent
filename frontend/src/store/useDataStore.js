@@ -270,14 +270,18 @@ export const useDataStore = create((set, get) => ({
         }
     },
 
-    generateReport: async () => {
+    generateReport: async (format = 'both') => {
         set({ isGeneratingReport: true, reportError: null });
         try {
             const sessionId = get().sessionId || sessionStorage.getItem('dida_session_id');
             const response = await fetch('/api/report/', {
                 method: 'POST',
                 headers: { 'X-Session-ID': sessionId, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: sessionId })
+                body: JSON.stringify({ 
+                    session_id: sessionId,
+                    format: format,
+                    include_visualizations: true
+                })
             });
             if (!response.ok) throw new Error('Report generation failed');
             const data = await response.json();
